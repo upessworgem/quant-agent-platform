@@ -1,279 +1,214 @@
-# 股票智能筛选系统
+# Quant Agent Platform
 
-一个基于 Python + Flask + Vue3 + Element Plus 的股票智能筛选系统，支持 AI 驱动的策略生成和数据分析。
+AI-driven stock screening platform with multi-agent architecture. Built with Python, Flask, Vue3, and LLM integration.
 
-## 系统架构
+## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        前端层 (Vue3)                         │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐       │
-│  │ 仪表盘   │ │股票管理 │ │策略管理 │ │ AI助手   │       │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘       │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      API 层 (Flask)                          │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐       │
-│  │ 股票API  │ │策略API   │ │筛选API   │ │ AI API   │       │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘       │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      服务层                                   │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐       │
-│  │数据获取  │ │策略执行  │ │AI分析    │ │数据存储  │       │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘       │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      数据层                                   │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐                     │
-│  │ SQLite   │ │通达信    │ │LLM API   │                     │
-│  └──────────┘ └──────────┘ └──────────┘                     │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                   Frontend (Vue3 + Element Plus)          │
+│   Dashboard  │  Stock Management  │  Strategy  │  AI Chat │
+└──────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌──────────────────────────────────────────────────────────┐
+│                    Flask REST API (v2)                     │
+│   /stocks  │  /strategies  │  /screening  │  /auth       │
+└──────────────────────────────────────────────────────────┘
+                            │
+              ┌─────────────┼─────────────┐
+              ▼             ▼             ▼
+┌──────────────────┐ ┌────────────┐ ┌──────────────────┐
+│  Strategy Engine  │ │  Data Layer │ │  Agent System     │
+│  - Condition eval │ │  - TDX/mootdx│ │  - Coordinator    │
+│  - Backtesting    │ │  - SQLite   │ │  - 4 Agents       │
+└──────────────────┘ └────────────┘ └──────────────────┘
 ```
 
-## 功能特性
+## Multi-Agent System
 
-### 核心功能
-- **股票数据管理**: 支持 A 股数据导入、查询、更新
-- **策略管理**: 可视化策略配置，支持多条件组合
-- **智能筛选**: 实时执行筛选策略，获取符合条件的股票
-- **AI 助手**: 自然语言生成策略，智能分析结果
+The core differentiator is the multi-agent AI architecture with a coordinator pattern:
 
-### AI 功能
-- **策略生成**: 用自然语言描述需求，AI 自动生成筛选条件
-- **结果分析**: AI 分析筛选结果，提供投资建议
-- **异常检测**: 自动识别数据异常和模式
-- **策略优化**: 基于历史数据给出策略改进建议
+| Agent | Role |
+|-------|------|
+| **StrategyGenerationAgent** | Converts natural language to structured screening strategy JSON |
+| **ResultAnalysisAgent** | Analyzes screening results, generates investment insights |
+| **AnomalyDetectionAgent** | Detects data anomalies and suspicious patterns |
+| **StrategyOptimizerAgent** | Suggests parameter tuning and risk assessments |
+| **AgentCoordinator** | Orchestrates agents into complete workflows |
 
-## 快速开始
+### Workflows
 
-### 环境要求
-- Python 3.8+
-- Node.js 16+
+**Full Screening Workflow:**
+1. User describes strategy in natural language
+2. `StrategyGenerationAgent` converts to structured conditions
+3. `AnomalyDetectionAgent` flags data quality issues
+4. `ResultAnalysisAgent` produces investment analysis
 
-### 后端部署
+**Optimization Workflow:**
+1. `StrategyOptimizerAgent` analyzes historical performance
+2. Suggests parameter adjustments
+3. Generates risk assessment for current market conditions
+
+## Project Structure
+
+```
+quant_agent_platform/
+├── quant_stock_screener/        # Main package (v2)
+│   ├── config/                  # Settings, dataclasses
+│   ├── core/                    # DataFetcher, StrategyEngine
+│   ├── agents/                  # Multi-agent system
+│   │   ├── base_agent.py        # Abstract base class
+│   │   ├── strategy_agent.py    # NL → strategy
+│   │   ├── analysis_agent.py    # Result analysis
+│   │   ├── anomaly_agent.py     # Anomaly detection
+│   │   ├── optimizer_agent.py   # Strategy optimization
+│   │   └── coordinator.py       # Workflow orchestration
+│   ├── ai/                      # LLM client wrappers
+│   ├── database/                # SQLAlchemy models + CRUD
+│   ├── api/                     # Flask route blueprints
+│   ├── web/                     # App factory, auth, middleware
+│   ├── utils/                   # Helpers
+│   └── __main__.py              # CLI entry point
+├── web-admin/                   # Vue3 + Element Plus frontend
+├── data/                        # Stock lists, SQLite DB
+├── deploy/                      # Docker, Nginx, Makefile
+├── legacy/                      # Archived v1 code
+└── tests/                       # Pytest suite
+```
+
+## Quick Start
+
+### Backend
 
 ```bash
-# 1. 克隆项目
-git clone <repository-url>
-cd tdx
+# Clone
+git clone https://github.com/upessworgem/quant-agent-platform.git
+cd quant-agent-platform
 
-# 2. 创建虚拟环境
+# Virtual environment
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate        # Windows: venv\Scripts\activate
 
-# 3. 安装依赖
+# Install dependencies
 pip install -r requirements.txt
 
-# 4. 启动服务
-python start_server.py
-# 或使用 Flask 命令
-flask --app app:app run --host=0.0.0.0 --port=5000
+# Start API server
+python -m quant_stock_screener --serve
+
+# Or run screening directly
+python -m quant_stock_screener --screen --max-stocks 20
 ```
 
-### 前端部署
+### Frontend
 
 ```bash
-# 1. 进入前端目录
 cd web-admin
-
-# 2. 安装依赖
 npm install
-
-# 3. 启动开发服务器
-npm run dev
-
-# 4. 生产构建
-npm run build
+npm run dev                     # Dev server at http://localhost:3000
+npm run build                   # Production build
 ```
 
-### 配置 AI 功能
+### AI Configuration
 
 ```bash
-# 设置环境变量
-export ANTHROPIC_API_KEY="your-api-key"
-export OPENAI_API_KEY="your-api-key"
-
-# 或使用 .env 文件
 cp .env.example .env
-# 编辑 .env 文件填入 API Key
+# Edit .env with your API keys
+
+# Supported providers
+ANTHROPIC_API_KEY=sk-xxx        # Claude
+OPENAI_API_KEY=sk-xxx           # GPT-4
 ```
 
-## API 文档
+Without API keys, the system works in mock mode (no AI features).
 
-### 基础信息
-- **Base URL**: `http://localhost:5000/api`
-- **文档地址**: `http://localhost:5000/docs`
+## API Reference
 
-### 主要接口
+Base URL: `http://localhost:5000/api`
+Interactive docs: `http://localhost:5000/docs`
 
-#### 股票管理
-```
-GET    /api/stocks              # 获取股票列表
-GET    /api/stocks/:code        # 获取股票详情
-POST   /api/stocks              # 创建股票
-PUT    /api/stocks/:code        # 更新股票
-DELETE /api/stocks/:code        # 删除股票
-```
+### Stocks
 
-#### 策略管理
-```
-GET    /api/strategies              # 获取策略列表
-GET    /api/strategies/:id           # 获取策略详情
-POST   /api/strategies               # 创建策略
-POST   /api/strategies/generate     # AI生成策略
-PUT    /api/strategies/:id          # 更新策略
-DELETE /api/strategies/:id          # 删除策略
-```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | /stocks | List stocks (paginated, searchable) |
+| GET | /stocks/:code | Get stock detail |
+| POST | /stocks | Create stock |
+| PUT | /stocks/:code | Update stock |
+| DELETE | /stocks/:code | Delete stock |
+| POST | /stocks/bulk | Bulk import |
+| GET | /stocks/:code/history | Historical data |
 
-#### 筛选执行
-```
-POST   /api/screening/execute              # 执行筛选
-GET    /api/screening-results             # 获取结果列表
-GET    /api/screening-results/:id         # 获取结果详情
-POST   /api/screening-results/:id/analyze  # AI分析结果
-```
+### Strategies
 
-## 项目结构
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | /strategies | List strategies |
+| POST | /strategies | Create strategy |
+| POST | /strategies/generate | **AI generates strategy from NL** |
+| POST | /strategies/:id/duplicate | Duplicate strategy |
+| PUT | /strategies/:id | Update strategy |
+| DELETE | /strategies/:id | Soft delete |
 
-```
-tdx/
-├── app.py                    # Flask 应用入口
-├── start_server.py           # 服务启动脚本
-├── api.py                    # API 路由
-├── config.py                 # 配置管理
-├── database.py               # 数据库操作
-├── models.py                 # 数据模型
-├── schemas.py                # 数据验证
-├── middlewares.py            # 中间件
-├── strategy.py             # 策略模块
-├── data_fetcher.py         # 数据获取
-├── ai_analyzer.py          # AI 分析
-├── main.py                 # CLI 入口
-├── requirements.txt        # Python 依赖
-├── tdxPj.py               # 原始脚本
-├── stock_list.txt          # 股票列表
-└── web-admin/              # 前端项目
-    ├── package.json
-    ├── vite.config.js
-    ├── index.html
-    └── src/
-        ├── main.js
-        ├── App.vue
-        ├── router/
-        ├── store/
-        ├── api/
-        ├── components/
-        └── views/
-```
+### Screening
 
-## 技术栈
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /screening/execute | Execute screening |
+| GET | /screening-results | List results |
+| GET | /screening-results/:id | Result detail with items |
+| POST | /screening-results/:id/analyze | **AI analyzes result** |
 
-### 后端
-- **Flask**: Web 框架
-- **SQLAlchemy**: ORM
-- **Pydantic**: 数据验证
-- **mootdx**: 通达信数据接口
+### Auth
 
-### 前端
-- **Vue 3**: 前端框架
-- **Element Plus**: UI 组件库
-- **Pinia**: 状态管理
-- **ECharts**: 图表库
-- **Axios**: HTTP 客户端
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /auth/login | Login (returns JWT) |
+| GET | /auth/me | Current user info |
+| POST | /auth/refresh | Refresh token |
 
-### AI
-- **Anthropic Claude**: LLM 模型
-- **OpenAI GPT**: 备选 LLM
+## Tech Stack
 
-## 开发指南
+**Backend:** Python 3.8+, Flask, SQLAlchemy 2.0, Pydantic 2.0
+**Data:** mootdx (TDX broker API), SQLite, pandas, numpy
+**AI:** Anthropic Claude, OpenAI GPT, multi-agent coordinator pattern
+**Frontend:** Vue 3, Element Plus, Pinia, ECharts, Axios
+**Deploy:** Docker multi-stage build, Nginx reverse proxy, Gunicorn
 
-### 添加新策略条件
-
-```python
-# 在 config.py 中添加条件定义
-FilterCondition(
-    name="市盈率",
-    field="pe_ratio",
-    operator="<",
-    value=20
-)
-```
-
-### 自定义 AI 提示词
-
-```python
-# 在 ai_analyzer.py 中修改提示词
-prompt = f"""
-你的自定义提示词...
-描述: {description}
-"""
-```
-
-### 添加新的 API 端点
-
-```python
-# 在 api.py 中添加路由
-@api_bp.route('/custom', methods=['POST'])
-def custom_endpoint():
-    data = request.get_json()
-    # 处理逻辑
-    return success_response(result)
-```
-
-## 测试
+## CLI Usage
 
 ```bash
-# 运行测试
+# Start server
+python -m quant_stock_screener --serve --port 5000
+
+# Run screening with default momentum strategy
+python -m quant_stock_screener --screen
+
+# AI-powered screening with natural language
+python -m quant_stock_screener --screen --use-ai --strategy-desc "turnover > 15%, volume ratio > 1.5"
+
+# Output as JSON
+python -m quant_stock_screener --screen --output json --max-stocks 50
+```
+
+## Docker Deployment
+
+```bash
+# Build and run
+docker-compose up -d
+
+# Or manually
+docker build -t quant-agent-platform -f deploy/Dockerfile .
+docker run -d -p 5000:5000 -e ANTHROPIC_API_KEY=xxx quant-agent-platform
+```
+
+## Testing
+
+```bash
 pytest tests/
-
-# 生成覆盖率报告
-pytest --cov=tdx tests/
+pytest --cov=quant_stock_screener tests/
 ```
 
-## 部署
-
-### Docker 部署
-
-```bash
-# 构建镜像
-docker build -t tdx-screener .
-
-# 运行容器
-docker run -d \
-  -p 5000:5000 \
-  -p 3000:3000 \
-  -e ANTHROPIC_API_KEY=xxx \
-  tdx-screener
-```
-
-### 生产环境配置
-
-```bash
-# 设置环境变量
-export FLASK_ENV=production
-export SECRET_KEY=your-secret-key
-export DATABASE_URL=sqlite:///production.db
-
-# 使用 Gunicorn
-gunicorn -w 4 -b 0.0.0.0:5000 app:app
-```
-
-## 许可证
+## License
 
 MIT License
-
-## 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
-## 联系方式
-
-- 项目主页: https://github.com/yourusername/tdx-screener
-- 问题反馈: https://github.com/yourusername/tdx-screener/issues
