@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 项目文件
+*.db
+*.sqlite
+*.sqlite3
+.env
+.env.local
+
+# 测试文件
+.pytest_cache/
+.coverage
+htmlcov/
+tests/*.db
+
+# 前端
+web-admin/node_modules/
+web-admin/dist/
+web-admin/.env.local
+web-admin/*.log
+
+# 数据文件
+stock_list.txt
+stock_list.csv
+debug_decrypted.bin
+
+# 日志文件
+*.log
+logs/
+
+# 其他
+.DS_Store
+Thumbs.db

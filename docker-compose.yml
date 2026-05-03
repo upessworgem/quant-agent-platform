@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # 后端 API 服务
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tdx-api
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_DEBUG=false
+      - DATABASE_URL=sqlite:///data/tdx_data.db
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key}
+      - JWT_SECRET=${JWT_SECRET:-your-jwt-secret}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    volumes:
+      - api-data:/app/data
+      - api-logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - tdx-network
+
+  # 前端静态文件服务
+  web:
+    image: nginx:alpine
+    container_name: tdx-web
+    ports:
+      - "3000:80"
+    volumes:
+      - ./web-admin/dist:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - tdx-network
+
+networks:
+  tdx-network:
+    driver: bridge
+
+volumes:
+  api-data:
+  api-logs:
